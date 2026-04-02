@@ -117,6 +117,38 @@ program consortdiagram_generate
 			replace left_sub = `left_sub' if id == `current'
 		}
 		
+		***List of descendants***
+		gen descendants = ""
+		sort order
+		* Loop from deepest node back to the root
+		summ order
+		local max = r(max)
+
+		forvalues i = `max'(-1)1 {
+			* Get this node's id
+			quietly summarize id if order == `i', meanonly
+			local nid = r(mean)
+			* Get this node's parent
+			quietly summarize parent_id if id == `nid', meanonly
+			local pid = r(mean)
+			* Skip if root (or no parent)
+			if missing(`pid') continue
+			* Append this node itself to its parent's descendant list
+			/*replace descendants = trim(descendants + " " + string(`nid')) ///
+				if id == `pid'*/
+			replace descendants = cond(descendants == "", string(`nid'), descendants + "," + string(`nid')) ///
+				if id == `pid'
+			* Get this node's current descendants as a string
+			local childdesc ""
+			local childdesc = descendants[`i']
+			* If it has descendants, append them to the parent as well
+			if "`childdesc'" != "" {
+				replace descendants = trim(descendants + " " + "`childdesc'") ///
+					if id == `pid'
+			}
+		}
+		***List of descendants***
+		
 		gen parent_node = .
 		levelsof name, local(prev_row_name)
 		foreach var in `prev_row_name' {
@@ -203,8 +235,15 @@ program consortdiagram_generate
 			
 			summ id if order == `parent_row'
 			local parent_id = `r(min)'
+			local descendants = descendants[`parent_row']
 			levelsof id if parent_id == `parent_id', separate(,) local(children)
-			summ row if (inlist(id,`children') | id == `parent_id' | inlist(parent_id,`children'))  & order <= `i'
+			if "`descendants'" == "" {
+				summ row if (inlist(id,`children') | id == `parent_id' | inlist(parent_id,`children')) & order <= `i'
+			}
+			else {
+				summ row if (inlist(id,`children') | id == `parent_id' | inlist(parent_id,`children') | ///
+					inlist(id,`descendants')) & order <= `i'
+			}
 			*replace row = `r(max)' + 1 if order == `i' & "`parent_layout'" == "msoOrgChartLayoutRightHanging"
 			replace row = `r(max)' + 1 if order == `i' & inlist("`parent_layout'", "msoOrgChartLayoutRightHanging", ///
 				"msoOrgChartLayoutLeftHanging")
