@@ -1,0 +1,6 @@
+v 1
+d consortdiagram: Tools for creating CONSORT-style flow diagrams
+d Author: Dylan Hansen
+d Email: dylan.hansen@svha.org.au
+
+l stata http://www.stata.com
