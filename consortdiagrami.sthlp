@@ -118,7 +118,7 @@ Text colour. Default is {cmd:black}.
 
 {phang}
 {cmd:fcolor(}{it:string}{cmd:)}  
-Fill colour for the node (if used by the rendering command). Default is {cmd:none}.
+Fill colour for the node. Default is {cmd:none}.
 
 {phang}
 {cmd:lcolor(}{it:string}{cmd:)}  
