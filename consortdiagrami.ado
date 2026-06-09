@@ -46,9 +46,19 @@ program consortdiagrami
 	local combined_alt = ""
 	forval i = 1/`n' {
 		local w : word `i' of `inputs'
-		local combined = `"`combined' `""' + " "  + `""' + char(34) + `"`w'"' + char(34) + `""'  "'
+		di "word `i' is `w'"
+		*local combined = `"`combined' `""' + " "  + `""' + char(34) + `"`w'"' + char(34) + `""'  "'
+		*local combined = `"`combined'"`w'"' + char(10)
+		*local combined `"`combined'"' `""`w'""' `=char(10)''
+		*local combined `"`combined'"' `""`w'""' `=char(10)''
+		*local combined = `"`combined'"' + `"""' + `"`w'"' + `"""' + " " + char(10)
+		local combined = `"`combined'"' + `"""' + `"`w'"' + `"""' + " " 
+		di "blork"
 		local combined_alt = "`combined_alt' `w'"
+		*di "this is it:"
+		*di "`combined'"
 	}
+	*local combined = substr(`"`combined'"',1,length(`"`combined'"')-1)
 	local layout = "msoOrgChartLayoutStandard"
 	if "`right'" != "" {
 		local layout = "msoOrgChartLayoutRightHanging"
@@ -97,8 +107,10 @@ program consortdiagrami
 				width height
 		}
 		di "hello"
+		di "`combined_alt'"
+		*di `"`combined'"'
 		frame post consortDiagramFrame (`parent_no') ("`parent'") ("`name'") ("`font'") ("`layout'") ///
-			(`combined') ("`combined_alt'") (`n') ("`tcolor'") ("`fcolor'") ("`lcolor'") ///
+			(`"`combined'"') ("`combined_alt'") (`n') ("`tcolor'") ("`fcolor'") ("`lcolor'") ///
 			("`margin'") (`width') (`height')
 		di "hello2"
 	}
