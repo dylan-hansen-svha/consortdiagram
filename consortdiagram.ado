@@ -105,7 +105,7 @@ program consortdiagram
 		local --stack_top
 		local v : word `depth' of `varlist'
 		local levels levels_`depth'
-		local var_lbe : variable label `v'
+		*local var_lbe : variable label `v'
 		local lbe : value label `v'
 		
 		if `: list v in right' {
@@ -130,8 +130,8 @@ program consortdiagram
 			}
 			local n = `count'
 			local var_val : label `lbe' `lvl'
-			local combined = `""' + char(34) + "`var_lbe': `var_val': n=`count'"  + char(34) + `""' 
-			local combined_alt = "`var_lbe': `var_val': n=`count'"
+			local combined = `""' + char(34) + "`var_val': n=`count'"  + char(34) + `""' 
+			local combined_alt = "`var_val': n=`count'"
 			
 			if `count' > 0 {
 				*Next filter
