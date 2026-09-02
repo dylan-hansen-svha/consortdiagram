@@ -230,13 +230,20 @@ program consortdiagram_generate
 			summ parent_node if order == `i'
 			local parent_row = `r(min)'
 			local parent_layout = layout[`parent_row']
+			local parent_child_number = child_number[`parent_row']
+			local reached_flag = 1
+			if `parent_child_number' == 1 {
+				local reached_flag = 0
+			}
 			local child_number = child_number[`i']
 			di "i = `i' parent_layout = `parent_layout' child_number = `child_number'"
 			if "`parent_layout'" == "msoOrgChartLayoutStandard" & `child_number' != 1 {
 				local col_new = `col_new' + 1 + 0.125
 			}
-			if "`parent_layout'" == "msoOrgChartLayoutRightHanging" & `child_number' == 1 {
+			if "`parent_layout'" == "msoOrgChartLayoutRightHanging" & `child_number' == 1 & ///
+			(`parent_child_number' == 1 | `reached_flag' == 0) {
 				local col_new = `col_new' + 0.125
+				local reached_flag = 1
 			}
 			if "`parent_layout'" == "msoOrgChartLayoutLeftHanging" & `child_number' == 1 {
 				replace col_new = col_new + 0.125 if col_new >= `col_new'
@@ -248,7 +255,6 @@ program consortdiagram_generate
 			*summ left if order == `i'
 			*if "`layout'" == "msoOrgChartLayoutLeftHanging" & `number_sub' != 0 & `r(max)' == 0 {
 			if "`layout'" == "msoOrgChartLayoutLeftHanging" & `number_sub' != 0 & left[`i'] == 0 {
-**# Bookmark #1
 				**summ left_sub if order == `i'
 				**local col_new = `col_new' + (0.125 * (`r(max)'))
 				*local col_new = `col_new' + (0.125 * left_sub[`i'])
@@ -542,7 +548,47 @@ program consortdiagram_generate
 		}
 		sort order
 		di "hello 1"
+		
+		**Bottom up shift**
+		sort id
+		quietly summ row
+		local max_row = `r(max)'
+		forval i = `max_row' (-1) 1 {
+			if `i' == `max_row' {
+				continue
+			}
+			di "`i'"
+			quietly levelsof id if row == `i', local(row_ids)
+			foreach j of local row_ids {
+				quietly summ col_disp if parent_id == `j'
+				if `r(N)' != 0 {
+					local new_col = (`r(max)' - `r(min)')/2 + `r(min)'
+					if layout[`j'] == "msoOrgChartLayoutStandard" {
+						local offset = 0
+					}
+					else if layout[`j'] == "msoOrgChartLayoutRightHanging" {
+						local offset = 0.125
+					}
+					else if layout[`j'] == "msoOrgChartLayoutLeftHanging" {
+						local offset = -0.125
+					}
+					quietly summ col_disp if id == `j'
+					local shift_amount = `new_col' - `r(mean)' - `offset'
+					di "id `j' shift amount `shift_amount'"
+					replace col_disp = col_disp + `shift_amount' if id == `j'
+					replace x_in = x_in + `shift_amount' if id == `j'
+					replace x_in2 = x_in2 + `shift_amount' if id == `j'
+					replace x_out = x_out + `shift_amount' if id == `j'
+					replace x_out2 = x_out2 + `shift_amount' if id == `j'
+					replace x_horizontal = x_horizontal + `shift_amount' if id == `j'
+					replace x_horizontal2 = x_horizontal2 + `shift_amount' if id == `j'
+				}
+			}
+		}
+		
+		sort order
 		***END Position of box***
+**# Bookmark #1
 		
 		***Generate the graph***
 		local post = ""
