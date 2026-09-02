@@ -231,8 +231,9 @@ program consortdiagram_generate
 			local parent_row = `r(min)'
 			local parent_layout = layout[`parent_row']
 			local parent_child_number = child_number[`parent_row']
+			local parent_col_new = col_new[`parent_row']
 			local reached_flag = 1
-			if `parent_child_number' == 1 {
+			if `parent_child_number' == 1 | `parent_col_new' >= `col_new' {
 				local reached_flag = 0
 			}
 			local child_number = child_number[`i']
